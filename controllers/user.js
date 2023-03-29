@@ -99,11 +99,7 @@ function saveUser(req, res) {
     if (req.params.page) {
       page = req.params.page;
     }
-    var items_per_page = 5;
-    console.log(User.find())
-      User.find()
-        .sort('_id')
-        .paginate(page, items_per_page, (err, users, total) => {
+      User.find((err, users) => {
             if (err) {
               return res.status(500).send({
               message: 'Error en la petición'
@@ -115,7 +111,7 @@ function saveUser(req, res) {
               });
             }
             return res.status(200).send({
-              users, pages: Math.ceil(total / items_per_page),
+              users: users
             });
           });
     }
@@ -137,7 +133,47 @@ function saveUser(req, res) {
         });
       })
     }
+
+    function updateUser(req, res) {
+      var userId = req.user.sub;
+      var update = req.body; //all the object with the information I want to update, except from pw
+      //delete the pw property
+      delete update.password;
+
+      User.findByIdAndUpdate(userId, update, {
+        new: true //returns the modified object, not the original without the update
+      }, (error, userUpdated) => {
+        if (error) {
+          return res.status(500).send({
+          message: 'Error en la petición'
+          });
+        }
+        if (!userUpdated) {
+          return res.status(404).send({
+          message: 'No se ha podido actualizar el usuario'
+          });
+        }
+        return res.status(200).send({
+          user: userUpdated
+        });
+      });
+    }
       
+    function deleteUser(req, res) {
+      var userId = req.user.sub;
+      User.find({
+        '_id': userId
+      }).remove((err) => {
+        if (err) {
+          return res.status(500).send({
+            message: 'Error al borrar el usuario'
+          });
+        }
+        return res.status(200).send({
+          message: 'Usuario eliminado correctamente'
+        });
+      })
+    } 
     
 
 //exportar la configuración
@@ -145,5 +181,7 @@ module.exports = {
     saveUser,
     login,
     getUsers,
-    getUser
+    getUser,
+    updateUser,
+    deleteUser
 };

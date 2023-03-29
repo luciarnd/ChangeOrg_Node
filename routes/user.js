@@ -9,7 +9,8 @@ api.post("/register", UserController.saveUser);
 api.post("/login", UserController.login);
 api.get("/me", md_auth.ensureAuth, UserController.getUser);
 api.get('/users/:page?', md_auth.ensureAuth, UserController.getUsers);
-//api.put("/user/", md_auth.ensureAuth, UserController.updateUser);
+api.put("/user/", md_auth.ensureAuth, UserController.updateUser);
+api.delete("/user", md_auth.ensureAuth, UserController.deleteUser);
 
 module.exports = api;
 
